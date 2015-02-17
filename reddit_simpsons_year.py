@@ -38,18 +38,22 @@ submissions_cleaned = filter(lambda x: process_season_num(x.link_flair_text) is 
 
 submissions_time_season = map(lambda x: [x.created, process_season_num(x.link_flair_text)], submissions_cleaned)
 submissions_df = DataFrame(submissions_time_season, columns=['dt','season'])
-submissions_df.date = submissions_df.dt
+submissions_df['date'] = map(lambda x: datetime.datetime.fromtimestamp(x).strftime('%Y-%m-%d'), submissions_df.dt)
  
-
-for x in query:
-   x.link_flair_text
-   x.created
-   x.link_flair_css_class == 'episode'
-   x.score
 
 
 from pylab import *
-import numpy
+import matplotlib.pyplot as plt
+plt.figure()
+histo,xedges,yedges = numpy.histogram2d((submissions_df.dt - 1414540313) / (1424146056 - 1414540313),
+   submissions_df.season / 26,
+   bins=[30, 26],
+   range=[[0, 1],[0,1]]
+)
+extent = [xedges[0], xedges[-1], yedges[0], yedges[-1] ]
+plt.imshow(histo.T,extent=extent,interpolation='nearest')
+colorbar()
+show()
 
 
 
@@ -60,7 +64,7 @@ def process_season_num(x):
       return(None)
    matchObj = re.match(r's([0-9]+)e([0-9]+)', x, re.M)
    if matchObj:
-      return([int(matchObj.group(1))]) #  , int(matchObj.group(2))])
+      return(int(matchObj.group(1))) #  , int(matchObj.group(2))])
    
 
 
