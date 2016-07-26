@@ -3,7 +3,6 @@ import elasticsearch
 
 index_name = 'simpsons'
 
-
 es = elasticsearch.Elasticsearch()  
 
 # load scripts
