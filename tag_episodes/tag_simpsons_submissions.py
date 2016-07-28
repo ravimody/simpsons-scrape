@@ -1,11 +1,13 @@
 import elasticsearch
 import pandas as pd
+import praw
 
 es = elasticsearch.Elasticsearch()  
 
 with open('simpsons_submissions.txt') as f:
     submission_ids = f.read().splitlines()
     
+scraper = praw.Reddit(user_agent='pc:simpsons_scraper:v0.1 (by /u/rm999)')
     
 episode_df = pd.DataFrame(columns= [
     'submission_id', 'submission_created', 'submission_url', 'submission_permalink', 'submission_is_self',
@@ -18,25 +20,27 @@ episode_df = pd.DataFrame(columns= [
 
 for submission_id in submission_ids:
     submission = scraper.get_submission(submission_id=submission_id)
+    try:
+        # get sum of scores of all comments by episode
+        scores = {}
+        for comment in submission.comments:
+            search_result = get_episode(comment.body)
+            if search_result['score']:
+                if search_result['episode'] in scores:
+                    scores[search_result['episode']] += search_result['score']
+                else:
+                    scores[search_result['episode']] = search_result['score']
 
-    # get sum of scores of all comments by episode
-    scores = {}
-    for comment in submission.comments:
-        search_result = get_episode(comment.body)
-        if search_result['score']:
-            if search_result['episode'] in scores:
-                scores[search_result['episode']] += search_result['score']
-            else:
-                scores[search_result['episode']] = search_result['score']
-
-    num_comments = len(submission.comments)
-    if scores:
-        comments_ep = max(scores, key=scores.get)
-        comments_score = scores[comments_ep]
-    else:
-        comments_ep = None
-        comments_score = None
-
+        num_comments = len(submission.comments)
+        if scores:
+            comments_ep = max(scores, key=scores.get)
+            comments_score = scores[comments_ep]
+        else:
+            comments_ep = None
+            comments_score = None
+    except:
+        continue
+        
     # get episode from title
     title = get_episode(submission.title)
     title_ep = title['episode']
@@ -53,6 +57,10 @@ for submission_id in submission_ids:
         flair_text
     ]
     print len(episode_df.index)
+    if len(episode_df.index) % 100 == 0:
+        episode_df.to_csv('episodes.tsv', sep='\t', index=False)
+        print "saving df"
+
 
 
 # function to get episode from searching transcripts
