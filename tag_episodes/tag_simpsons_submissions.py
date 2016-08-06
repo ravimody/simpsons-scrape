@@ -1,3 +1,5 @@
+import os.path
+
 import elasticsearch
 import pandas as pd
 import praw
@@ -8,17 +10,22 @@ with open('simpsons_submissions.txt') as f:
     submission_ids = f.read().splitlines()
     
 scraper = praw.Reddit(user_agent='pc:simpsons_scraper:v0.1 (by /u/rm999)')
-    
-episode_df = pd.DataFrame(columns= [
-    'submission_id', 'submission_created', 'submission_url', 'submission_permalink', 'submission_is_self',
-    'submission_ups', 'submission_downs',
-    'comments_ep', 'comments_score', 'num_comments',
-    'title_ep', 'title_score',
-    'flair_text'
-    ]
-)
+
+if os.path.isfile('episodes.tsv'):
+    episode_df = pd.DataFrame.from_csv('episodes.tsv', sep='\t', index_col=False, encoding='utf-8')    
+else:    
+    episode_df = pd.DataFrame(columns= [
+        'submission_id', 'submission_created', 'submission_url', 'submission_permalink', 'submission_is_self',
+        'submission_ups', 'submission_downs',
+        'comments_ep', 'comments_score', 'num_comments',
+        'title_ep', 'title_score',
+        'flair_text'
+        ]
+    )
 
 for submission_id in submission_ids:
+    if submission_id in episode_df.submission_id:
+        continue
     submission = scraper.get_submission(submission_id=submission_id)
     try:
         # get sum of scores of all comments by episode
@@ -58,7 +65,7 @@ for submission_id in submission_ids:
     ]
     print len(episode_df.index)
     if len(episode_df.index) % 100 == 0:
-        episode_df.to_csv('episodes.tsv', sep='\t', index=False)
+        episode_df.to_csv('episodes.tsv', sep='\t', index=False, encoding='utf-8')
         print "saving df"
 
 
