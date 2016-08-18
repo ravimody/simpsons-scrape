@@ -24,7 +24,7 @@ else:
     )
 
 for submission_id in submission_ids:
-    if submission_id in episode_df.submission_id:
+    if episode_df['submission_id'].str.contains(submission_id).any():
         continue
     submission = scraper.get_submission(submission_id=submission_id)
     try:
