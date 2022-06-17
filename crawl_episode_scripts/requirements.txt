@@ -20,7 +20,7 @@ modulegraph==0.10.4
 newspaper==0.0.9.8
 nltk==2.0.5
 nose==1.2.1
-numpy==1.8.0rc1
+numpy==1.21.0
 ## FIXME: could not find svn URL in dependency_links for this package:
 pandas==0.9.0.dev-1e68fd9-20120920
 patsy==0.1.0
