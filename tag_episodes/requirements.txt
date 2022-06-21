@@ -1,6 +1,6 @@
 decorator==4.0.10
 elasticsearch==2.3.0
-numpy==1.11.1
+numpy==1.22.0
 pandas==0.18.1
 praw==3.5.0
 python-dateutil==2.5.3
